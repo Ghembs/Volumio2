@@ -659,7 +659,8 @@ ControllerWebradio.prototype.search = function (query) {
 
     var defer = libQ.defer();
     var list = [];
-    list.push({type:'title',title:'Webradios'});
+	var items = []
+    list.push({type:'title',title:'Webradios',availableListViews:["list"],items:items});
 
     var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+nodetools.urlEncode(query.value)+'&limit=20';
 
@@ -709,7 +710,7 @@ ControllerWebradio.prototype.search = function (query) {
                         uri: 'http://yp.shoutcast.com' + base+'?id='+id
                     };
 
-                    list.push(category);
+                    items.push(category);
                 }
 
             }

@@ -1205,20 +1205,17 @@ ControllerMpd.prototype.search = function (query) {
 
 		if(values[0])
 		{
-			list=[{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_ARTIST_SECTION')}].
-			concat(values[0]);
+			list=[{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_ARTIST_SECTION'),availableListViews:["list","grid"],items:values[0]}];
 		}
 
 		if(values[1])
 		{
-			list=list.concat([{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_ALBUM_SECTION')}]).
-			concat(values[1]);
+			list=list.concat([{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_ALBUM_SECTION'),availableListViews:["list","grid"],items:values[1]}]);
 		}
 
 		if(values[2])
 		{
-			list=list.concat([{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_SONG_SECTION')}]).
-			concat(values[2]);
+			list=list.concat([{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_SONG_SECTION'),availableListViews:["list"],items:values[2]}]);
 		}
 
 		list=list.filter(function(v){return !!(v)==true;})

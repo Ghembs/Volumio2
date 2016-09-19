@@ -738,7 +738,7 @@ CoreMusicLibrary.prototype.search = function(data) {
                         prev: {
                             uri: '/'
                         },
-                        list: searcharray
+                        lists: searcharray
                     }
                 });
             })
