@@ -33,7 +33,7 @@ ControllerNetwork.prototype.onVolumioStart = function () {
 	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
 	config.loadFile(configFile);
 
-    return libQ.resolve();
+	return libQ.resolve();
 };
 
 ControllerNetwork.prototype.onStop = function () {
@@ -75,39 +75,39 @@ ControllerNetwork.prototype.getUIConfig = function () {
 		{
 
 
-	//dhcp
-	uiconf.sections[1].content[0].value = config.get('dhcp');
+			//dhcp
+			uiconf.sections[1].content[0].value = config.get('dhcp');
 
-	//static ip
-	uiconf.sections[1].content[1].value = config.get('ethip');
+			//static ip
+			uiconf.sections[1].content[1].value = config.get('ethip');
 
-	//static netmask
-	uiconf.sections[1].content[2].value = config.get('ethnetmask');
+			//static netmask
+			uiconf.sections[1].content[2].value = config.get('ethnetmask');
 
-	//static gateway
-	uiconf.sections[1].content[3].value = config.get('ethgateway');
+			//static gateway
+			uiconf.sections[1].content[3].value = config.get('ethgateway');
 
 
-	//Wireless
+			//Wireless
 
-	//dhcp
-	  //dhcp
-        if (config.get('wirelessdhcp') == undefined) {
-            uiconf.sections[2].content[0].value = true;
-        } else {
-            uiconf.sections[2].content[0].value = config.get('wirelessdhcp');
-        }
+			//dhcp
+			//dhcp
+			if (config.get('wirelessdhcp') == undefined) {
+				uiconf.sections[2].content[0].value = true;
+			} else {
+				uiconf.sections[2].content[0].value = config.get('wirelessdhcp');
+			}
 
-	//static ip
-	uiconf.sections[2].content[1].value = config.get('wirelessip');
+			//static ip
+			uiconf.sections[2].content[1].value = config.get('wirelessip');
 
-	//static netmask
-	uiconf.sections[2].content[2].value = config.get('wirelessnetmask');
+			//static netmask
+			uiconf.sections[2].content[2].value = config.get('wirelessnetmask');
 
-	//static gateway
-	uiconf.sections[2].content[3].value = config.get('wirelessgateway');
+			//static gateway
+			uiconf.sections[2].content[3].value = config.get('wirelessgateway');
 
-	//console.log(uiconf);
+			//console.log(uiconf);
 
 			defer.resolve(uiconf);
 		})
@@ -166,89 +166,94 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 
 
 
-	 iwlist.scan('wlan0', function (err, networks) {
-		 var self = this;
+	iwlist.scan('wlan0', function (err, networks) {
+		var self = this;
 
-		 if (err) {
-		 	console.log('Cannot use regular scanning, forcing with ap-force')
-			 var networksarray = [];
-			 var arraynumber = 0;
+		if (err) {
+			console.log('An error occurred while scanning: '+err)
+			console.log('Cannot use regular scanning, forcing with ap-force')
+			var networksarray = [];
+			var arraynumber = 0;
 
-			 var wirelessnets = execSync("/usr/bin/sudo /sbin/iw dev wlan0 scan ap-force", { encoding: 'utf8' });
-			 var wirelessnets2 = wirelessnets.split('BSS');
-			 for (var i = 0; i < wirelessnets2.length; i++) {
-				 var network = {};
-				 var wirelessnets3 = wirelessnets2[i].split("\n")
-				 for (var e = 0; e < wirelessnets3.length; e++) {
-					 var scanResults = wirelessnets3[e].replace('\t','').replace(' ','').split(":");
-					 //console.log(scanResults);
 
-					 switch(scanResults[0]) {
-						 case 'SSID':
+			try {
+				var wirelessnets = execSync("/usr/bin/sudo /sbin/iw dev wlan0 scan ap-force", {encoding: 'utf8'});
 
-							 network.ssid = scanResults[1].toString();
+				var wirelessnets2 = wirelessnets.split('BSS');
+				for (var i = 0; i < wirelessnets2.length; i++) {
+					var network = {};
+					var wirelessnets3 = wirelessnets2[i].split("\n")
+					for (var e = 0; e < wirelessnets3.length; e++) {
+						var scanResults = wirelessnets3[e].replace('\t', '').replace(' ', '').split(":");
+						//console.log(scanResults);
 
-							 break;
-						 case 'WPA':
+						switch (scanResults[0]) {
+							case 'SSID':
 
-							 network.security = 'wpa2';
+								network.ssid = scanResults[1].toString();
 
-							 break;
-						 case 'signal':
+								break;
+							case 'WPA':
 
-						 	var signal = '';
-							 var dbmraw= scanResults[1].split('.');
-							 var dbm =Number(dbmraw[0]);
-							 var rel = 100+dbm;
+								network.security = 'wpa2';
 
-							 if (rel >= 65)
-								 signal = 5;
-							 else if (rel >= 50)
-								 signal = 4;
-							 else if (rel >= 40)
-								 signal = 3;
-							 else if (rel >= 30)
-								 signal = 2;
-							 else if (rel >= 1)
-								 signal = 1;
+								break;
+							case 'signal':
 
-							 network.signal = signal;
+								var signal = '';
+								var dbmraw = scanResults[1].split('.');
+								var dbm = Number(dbmraw[0]);
+								var rel = 100 + dbm;
 
-							 break;
-						 default:
-							 break;
-					 }
+								if (rel >= 65)
+									signal = 5;
+								else if (rel >= 50)
+									signal = 4;
+								else if (rel >= 40)
+									signal = 3;
+								else if (rel >= 30)
+									signal = 2;
+								else if (rel >= 1)
+									signal = 1;
 
-				 }
+								network.signal = signal;
 
-				 if (network.ssid) {
-					 //console.log(network)
-					 if (networksarray.length > 0) {
-						 var found = false;
-						 for (var o = 0; o < networksarray.length; o++) {
-							 if (network.ssid == networksarray[o].ssid) {
-								 found = true;
-							 }
-						 }
-						 if (found === false){
-							 networksarray.push(network);
-						 }
-					 } else {
-						 networksarray.push(network);
-					 }
-				 }
-			 }
+								break;
+							default:
+								break;
+						}
 
-			 var networkresults = {"available": networksarray}
-			 defer.resolve(networkresults);
+					}
 
-		 } else {
-			 var networksarray = networks;
-			 var networkresults = {"available": networksarray}
-			 defer.resolve(networkresults);
-		 }
+					if (network.ssid) {
+						//console.log(network)
+						if (networksarray.length > 0) {
+							var found = false;
+							for (var o = 0; o < networksarray.length; o++) {
+								if (network.ssid == networksarray[o].ssid) {
+									found = true;
+								}
+							}
+							if (found === false) {
+								networksarray.push(network);
+							}
+						} else {
+							networksarray.push(network);
+						}
+					}
+				}
 
-	 });
+				var networkresults = {"available": networksarray}
+				defer.resolve(networkresults);
+			} catch (e)
+			{console.log('Cannot use fallback scanning method: '+e)}
+		} else {
+			var networksarray = networks;
+			var networkresults = {"available": networksarray}
+			defer.resolve(networkresults);
+		}
+
+	});
 
 	return defer.promise;
 };
@@ -437,9 +442,9 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 
 				ws.end();
 				staticconf.end();
-					//console.log("Restarting networking layer");
-					self.commandRouter.wirelessRestart();
-					self.commandRouter.networkRestart();
+				//console.log("Restarting networking layer");
+				self.commandRouter.wirelessRestart();
+				self.commandRouter.networkRestart();
 
 
 			} catch (err) {
